@@ -2,7 +2,13 @@
 
 **A role-based Customer Relationship Management system built with ASP.NET Core 8.**
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Open_App-4f46e5?style=for-the-badge)](https://acxiomcrm-go4x.onrender.com)
+
+🌐 **Live demo:** https://acxiomcrm-go4x.onrender.com
+*(Hosted on a free plan: the first load may take about a minute, and data resets when the service sleeps. See [Bonus: Deployment & live demo](#20-bonus-deployment--live-demo).)*
+
 AcxiomCRM covers the full customer-sales lifecycle: lead capture, qualification and conversion, an opportunity pipeline, follow-ups and activity tracking. It is built with production-oriented engineering:
+
 - ASP.NET Core Identity authentication with password policy and lockout
 - Server-side, role-based data scoping
 - Two-layer (client + server) validation with business rules
@@ -10,13 +16,27 @@ AcxiomCRM covers the full customer-sales lifecycle: lead capture, qualification 
 - A documented REST API
 - Docker packaging and CI
 
-![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)
-![ASP.NET Core MVC](https://img.shields.io/badge/ASP.NET%20Core-MVC-5C2D91)
-![EF Core](https://img.shields.io/badge/EF%20Core-8-0b7285)
-![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite)
-![Bootstrap 5](https://img.shields.io/badge/Bootstrap-5-7952B3?logo=bootstrap)
-![Chart.js](https://img.shields.io/badge/Chart.js-4-FF6384?logo=chartdotjs)
-![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker)
+[![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
+[![ASP.NET Core MVC](https://img.shields.io/badge/ASP.NET%20Core-MVC-5C2D91)](https://learn.microsoft.com/aspnet/core)
+[![EF Core](https://img.shields.io/badge/EF%20Core-8-0b7285)](https://learn.microsoft.com/ef/core)
+[![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite)](https://www.sqlite.org/)
+[![Bootstrap 5](https://img.shields.io/badge/Bootstrap-5-7952B3?logo=bootstrap)](https://getbootstrap.com/)
+[![Chart.js](https://img.shields.io/badge/Chart.js-4-FF6384?logo=chartdotjs)](https://www.chartjs.org/)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker)](https://www.docker.com/)
+
+<!--
+SCREENSHOTS (recommended): save images in docs/screenshots/ and uncomment the block below.
+
+## Screenshots
+
+| Admin dashboard | Sales pipeline (Kanban) |
+|---|---|
+| ![Admin dashboard](docs/screenshots/dashboard.png) | ![Pipeline](docs/screenshots/pipeline.png) |
+
+| Audit log | Lead conversion |
+|---|---|
+| ![Audit log](docs/screenshots/audit-log.png) | ![Lead conversion](docs/screenshots/lead-convert.png) |
+-->
 
 ---
 
@@ -37,11 +57,11 @@ AcxiomCRM covers the full customer-sales lifecycle: lead capture, qualification 
 13. [Project structure](#13-project-structure)
 14. [Getting started (local)](#14-getting-started-local)
 15. [Configuration reference](#15-configuration-reference)
-16. [Deployment](#16-deployment)
-17. [CI/CD pipeline](#17-cicd-pipeline)
-18. [Acceptance test walkthrough](#18-acceptance-test-walkthrough)
-19. [Module checklist](#19-module-checklist)
-20. [Roadmap](#20-roadmap)
+16. [CI pipeline](#16-ci-pipeline)
+17. [Acceptance test walkthrough](#17-acceptance-test-walkthrough)
+18. [Module checklist](#18-module-checklist)
+19. [Roadmap](#19-roadmap)
+20. [Bonus: Deployment & live demo](#20-bonus-deployment--live-demo)
 
 ---
 
@@ -58,7 +78,7 @@ When the app runs in **Development** mode (see [Getting started](#14-getting-sta
 
 > Both Sales Executives report to the Manager. Signing in as **Sameer Sales** and then **Divya Deshpande** shows that each rep sees a different, non-overlapping set of customers. Opening one of the other rep's records by editing the URL returns **404**.
 
-These are demo accounts for local and evaluation use only. They are defined in `src/AcxiomCRM/appsettings.Development.json`, which is excluded from publish output and Docker images. Production environments create their administrator from environment variables (see [Deployment](#16-deployment)).
+These are demo accounts for local and evaluation use only. They are defined in `src/AcxiomCRM/appsettings.Development.json`, which is excluded from publish output and Docker images. Production environments create their administrator from environment variables (see [Bonus: Deployment](#20-bonus-deployment--live-demo)).
 
 **Lockout:** 5 wrong passwords lock an account for 15 minutes. Sign in as Admin → Administration → Users → **Unlock**.
 
@@ -150,7 +170,8 @@ flowchart TB
 flowchart LR
     A[Forwarded headers*] --> B[Exception handler / HSTS*] --> C[Status-code pages<br/>non-API] --> D[Security headers] --> E[Static files] --> F[Routing] --> G[Rate limiter] --> H[Authentication] --> I[Authorization<br/>fallback = authenticated] --> J[Anti-forgery filter] --> K[Controller → Service → DbContext]
 ```
-<sub>* enabled by configuration / environment</sub>
+
+\* enabled by configuration / environment
 
 ### Key design decisions
 
@@ -449,6 +470,7 @@ Validation runs in **three layers**. The client layer is for user experience onl
 | Recent system activity | ✅ | — | — |
 
 Every role also gets:
+
 - **KPI cards:** Total Customers · Total Leads · Open Leads · Total / Open / Won / Lost Opportunities · Total Pipeline Value · Weighted Pipeline · Pending and Overdue Follow-Ups
 - **Charts (Chart.js):** Leads by Status (doughnut) · Opportunity Pipeline (amount bars + count line) · Monthly Sales, Won vs Lost over 12 months
 
@@ -571,9 +593,10 @@ cd AcxiomCRM
 dotnet run --project src/AcxiomCRM --launch-profile http
 ```
 
-Open **http://localhost:5063** and sign in with any account from [Demo login credentials](#1-demo-login-credentials).
+Open **<http://localhost:5063>** and sign in with any account from [Demo login credentials](#1-demo-login-credentials).
 
 On first start the app:
+
 1. Creates `src/AcxiomCRM/App_Data/acxiomcrm.db`.
 2. Applies migrations.
 3. Seeds the roles, demo users and sample data.
@@ -610,39 +633,7 @@ Every setting can be overridden with an environment variable, using `__` for nes
 
 ---
 
-## 16. Deployment
-
-The app ships as a Docker image (`Dockerfile`):
-- Multi-stage build.
-- Runs as a **non-root** user on port **8080**.
-- Stores its database and keys on a volume at **`/app/data`**.
-- Exposes **`GET /health`** for probes.
-
-### Docker / docker-compose
-
-```bash
-cp .env.example .env            # set ADMIN_EMAIL and ADMIN_PASSWORD
-docker compose up -d --build    # → http://localhost:8080
-```
-
-### Render (recommended PaaS)
-
-1. **New → Web Service**, connect this repository. The runtime is detected as **Docker**.
-2. **Environment variables:**
-   - `PORT=8080`
-   - `ReverseProxy__Enabled=true`
-   - `Seed__Users__0__Email`, `Seed__Users__0__Password`, `Seed__Users__0__Role=Admin`
-   - For a demo, also `Seed__SampleData=true` plus `Seed__Users__1..3__*` for the Manager and Sales Executives.
-3. **Health check path:** `/health`.
-4. **Persistent data (paid plan):** add a disk mounted at `/app/data`. On the free plan, data resets whenever the service sleeps or redeploys.
-
-> **Vercel is not supported.** It has no .NET runtime and no persistent filesystem. Use Render, Railway, Fly.io, Azure App Service or any Docker host.
-
-See **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** for Linux + nginx + HTTPS, IIS, Azure App Service, backups and a go-live checklist.
-
----
-
-## 17. CI/CD pipeline
+## 16. CI pipeline
 
 `.github/workflows/ci.yml` runs on every push to `main` and on every pull request:
 
@@ -658,7 +649,7 @@ With Render's auto-deploy enabled, every successful push to `main` is rebuilt an
 
 ---
 
-## 18. Acceptance test walkthrough
+## 17. Acceptance test walkthrough
 
 These steps follow the assignment's final acceptance scenario. Each one can be reproduced in the browser with the demo accounts.
 
@@ -681,7 +672,7 @@ These steps follow the assignment's final acceptance scenario. Each one can be r
 
 ---
 
-## 19. Module checklist
+## 18. Module checklist
 
 | Module | Items | Where |
 |---|---|---|
@@ -697,10 +688,51 @@ These steps follow the assignment's final acceptance scenario. Each one can be r
 
 ---
 
-## 20. Roadmap
+## 19. Roadmap
 
 - [ ] Reports module: customer, lead, follow-up, conversion, user-activity and audit reports with CSV export
 - [ ] OpenAPI / Swagger UI for the REST API
 - [ ] Automated integration tests (xUnit + `WebApplicationFactory`) wired into CI
 - [ ] Header notifications for overdue follow-ups
 - [ ] Optional SQL Server provider switch
+
+---
+
+## 20. Bonus: Deployment & live demo
+
+> The assignment did not require deployment. As an extra, the app is packaged with Docker and hosted live so it can be tried without installing anything.
+
+### 🌐 Live demo: **https://acxiomcrm-go4x.onrender.com**
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Open_App-4f46e5?style=for-the-badge)](https://acxiomcrm-go4x.onrender.com)
+
+Hosted on Render's free plan: if the service has been idle, the first load can take about a minute while it wakes up, and data resets whenever it sleeps or redeploys.
+
+The app ships as a Docker image (`Dockerfile`):
+
+- Multi-stage build.
+- Runs as a **non-root** user on port **8080**.
+- Stores its database and keys on a volume at **`/app/data`**.
+- Exposes **`GET /health`** for probes.
+
+### Docker / docker-compose
+
+```bash
+cp .env.example .env            # set ADMIN_EMAIL and ADMIN_PASSWORD
+docker compose up -d --build    # → http://localhost:8080
+```
+
+### Render (recommended PaaS, used for the live demo)
+
+1. **New → Web Service**, connect this repository. The runtime is detected as **Docker**.
+2. **Environment variables:**
+   - `PORT=8080`
+   - `ReverseProxy__Enabled=true`
+   - `Seed__Users__0__Email`, `Seed__Users__0__Password`, `Seed__Users__0__Role=Admin`
+   - For a demo, also `Seed__SampleData=true` plus `Seed__Users__1..3__*` for the Manager and Sales Executives.
+3. **Health check path:** `/health`.
+4. **Persistent data (paid plan):** add a disk mounted at `/app/data`. On the free plan, data resets whenever the service sleeps or redeploys.
+
+> **Vercel is not supported.** It has no .NET runtime and no persistent filesystem. Use Render, Railway, Fly.io, Azure App Service or any Docker host.
+
+See **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** for Linux + nginx + HTTPS, IIS, Azure App Service, backups and a go-live checklist.
