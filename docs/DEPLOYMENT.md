@@ -57,6 +57,29 @@ docker compose pull && docker compose up -d --build   # redeploy; data volume is
 docker run --rm -v acxiomcrm_acxiomcrm-data:/data -v "$PWD":/backup alpine tar czf /backup/acxiomcrm-backup.tgz -C /data .   # back up the volume
 ```
 
+## Option A2: Render (managed Docker hosting)
+
+1. Go to **render.com → New → Web Service** and connect `cherrieee24/AcxiomCRM`. The runtime is detected as **Docker** from the `Dockerfile`.
+2. Choose the **Singapore** region (closest to India) and the `main` branch.
+3. Add these **environment variables**:
+
+   | Key | Value |
+   |---|---|
+   | `PORT` | `8080` |
+   | `ReverseProxy__Enabled` | `true` |
+   | `Seed__Users__0__Email` / `__Password` / `__FullName` | the administrator account |
+   | `Seed__Users__0__Role` | `Admin` |
+   | `Seed__SampleData` | `true` for a demo environment |
+   | `Seed__Users__1__*` | a Manager (`Role=Manager`) |
+   | `Seed__Users__2__*`, `Seed__Users__3__*` | Sales Executives (`Role=SalesExecutive`, `ManagerEmail=` the manager's email) |
+
+4. Under **Advanced**:
+   - set the **Health Check Path** to `/health`;
+   - on a paid instance, add a **Disk** mounted at `/app/data` (1 GB is plenty).
+5. Click **Create Web Service**. The first build takes about 5–8 minutes. Later pushes to `main` redeploy automatically.
+
+On the **free** instance the filesystem is temporary. The database resets whenever the service sleeps (after about 15 idle minutes), restarts or redeploys. With `Seed__SampleData=true` and the demo users configured, each start gives a fresh, fully populated demo.
+
 ## Option B: Publish folder (Linux VM, Windows/IIS, Azure App Service)
 
 ```bash
