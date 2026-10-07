@@ -1,0 +1,17 @@
+@{
+    var code = ViewData["Code"] as int? ?? 0;
+    var (title, message, icon) = code switch
+    {
+        403 => ("Access denied", "You don't have permission to view this page.", "bi-shield-x"),
+        404 => ("Not found", "The page or record you requested doesn't exist, or you don't have access to it.", "bi-search"),
+        429 => ("Too many requests", "Please wait a minute and try again.", "bi-hourglass-split"),
+        _ => ("Something went wrong", "The request could not be completed.", "bi-exclamation-octagon")
+    };
+    ViewData["Title"] = title;
+}
+<div class="text-center py-5">
+    <i class="bi @icon display-3 text-muted"></i>
+    <h1 class="h3 mt-3">@title</h1>
+    <p class="text-muted">@message</p>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Back to Dashboard</a>
+</div>

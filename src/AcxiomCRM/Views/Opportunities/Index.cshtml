@@ -1,0 +1,83 @@
+@model ListViewModel<Opportunity, OpportunityFilter>
+@{
+    ViewData["Title"] = "Opportunities";
+    var f = Model.Filter;
+}
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-graph-up-arrow"></i> @Ui.ScopeTitle(User, "Opportunities")</h1>
+        <partial name="_ScopeHint" />
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Pipeline" class="btn btn-outline-primary"><i class="bi bi-kanban"></i> Pipeline View</a>
+        <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Opportunity</a>
+    </div>
+</div>
+
+<form method="get" class="filter-bar row g-2 align-items-end">
+    <div class="col-md-3">
+        <label class="form-label small" for="Search">Search</label>
+        <input id="Search" name="Search" value="@f.Search" class="form-control" placeholder="Opportunity or customer name" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="Stage">Stage</label>
+        <select id="Stage" name="Stage" class="form-select" asp-items="EnumExtensions.ToSelectList(f.Stage)"><option value="">All</option></select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="Status">Status</label>
+        <select id="Status" name="Status" class="form-select" asp-items="EnumExtensions.ToSelectList(f.Status)"><option value="">All</option></select>
+    </div>
+    @if (Model.Users.Count > 0)
+    {
+        <div class="col-md-2">
+            <label class="form-label small" for="AssignedTo">Owner</label>
+            <select id="AssignedTo" name="AssignedTo" class="form-select" asp-items="Model.Users"><option value="">Anyone</option></select>
+        </div>
+    }
+    <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filter</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th><partial name="_SortHeader" model='("name", "Opportunity", f.Sort, f.Desc)' /></th>
+                    <th>Customer</th>
+                    <th>Stage</th>
+                    <th class="text-end"><partial name="_SortHeader" model='("amount", "Amount", f.Sort, f.Desc)' /></th>
+                    <th class="text-end">Prob.</th>
+                    <th class="text-end">Weighted</th>
+                    <th><partial name="_SortHeader" model='("close", "Close Date", f.Sort, f.Desc)' /></th>
+                    <th>Owner</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model.Items.Items)
+                {
+                    var overdue = o.Status == OpportunityStatus.Open && o.ExpectedCloseDate < DateTime.Today;
+                    <tr>
+                        <td><a asp-action="Details" asp-route-id="@o.OpportunityId" class="fw-semibold">@o.OpportunityName</a></td>
+                        <td><a asp-controller="Customers" asp-action="Details" asp-route-id="@o.CustomerId">@o.Customer?.CustomerName</a></td>
+                        <td><span class="@Ui.Badge(o.Stage)">@o.Stage</span></td>
+                        <td class="text-end">@Ui.Money(o.Amount)</td>
+                        <td class="text-end">@o.Probability%</td>
+                        <td class="text-end text-muted">@Ui.Money(o.WeightedAmount)</td>
+                        <td class="@(overdue ? "text-danger" : "")">@Ui.Date(o.ExpectedCloseDate)</td>
+                        <td>@(o.AssignedUser?.FullName ?? "—")</td>
+                        <td class="text-end"><a asp-action="Edit" asp-route-id="@o.OpportunityId" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a></td>
+                    </tr>
+                }
+                @if (Model.Items.TotalCount == 0)
+                {
+                    <tr><td colspan="9" class="text-center text-muted py-4">No opportunities found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<partial name="_Pager" model="Model.Items.Pager" />

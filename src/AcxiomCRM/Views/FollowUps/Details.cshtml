@@ -1,0 +1,67 @@
+@model DetailsViewModel<FollowUp>
+@{
+    var f = Model.Item;
+    ViewData["Title"] = f.Subject;
+    var canDelete = User.IsInRole(Roles.Admin) || User.IsInRole(Roles.Manager);
+}
+<div class="page-header">
+    <div>
+        <h1>@f.Subject <span class="@Ui.Badge(f.Status) fs-6 align-middle">@(f.IsOverdue ? "Overdue" : f.Status.ToString())</span></h1>
+        <small class="text-muted">@f.FollowUpType · @Ui.Date(f.FollowUpDate)</small>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        @if (f.Status == FollowUpStatus.Planned)
+        {
+            <a asp-action="Edit" asp-route-id="@f.FollowUpId" class="btn btn-primary"><i class="bi bi-pencil"></i> Edit</a>
+        }
+        @if (f.Status is FollowUpStatus.Planned or FollowUpStatus.Missed)
+        {
+            <a asp-action="Reschedule" asp-route-id="@f.FollowUpId" class="btn btn-outline-primary"><i class="bi bi-calendar-event"></i> Reschedule</a>
+        }
+        @if (canDelete)
+        {
+            <form asp-action="Delete" asp-route-id="@f.FollowUpId" method="post" data-confirm="Delete this follow-up?">
+                <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100"><div class="card-body">
+            <dl class="detail-list mb-0">
+                <dt>Customer</dt><dd>@if (f.Customer != null) { <a asp-controller="Customers" asp-action="Details" asp-route-id="@f.CustomerId">@f.Customer.CustomerName</a> } else { <text>—</text> }</dd>
+                <dt>Lead</dt><dd>@if (f.Lead != null) { <a asp-controller="Leads" asp-action="Details" asp-route-id="@f.LeadId">@f.Lead.LeadName</a> } else { <text>—</text> }</dd>
+                <dt>Opportunity</dt><dd>@if (f.Opportunity != null) { <a asp-controller="Opportunities" asp-action="Details" asp-route-id="@f.OpportunityId">@f.Opportunity.OpportunityName</a> } else { <text>—</text> }</dd>
+                <dt>Assigned To</dt><dd>@(f.AssignedUser?.FullName ?? "Unassigned")</dd>
+                @if (f.CompletedDate.HasValue) { <dt>Completed</dt><dd>@Ui.Timestamp(f.CompletedDate.Value)</dd> }
+                <dt>Remarks</dt><dd class="text-pre">@(f.Remarks ?? "—")</dd>
+            </dl>
+        </div></div>
+    </div>
+    @if (f.Status == FollowUpStatus.Planned)
+    {
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Update Outcome</div>
+                <div class="card-body">
+                    <form asp-action="Complete" asp-route-id="@f.FollowUpId" method="post" class="mb-3">
+                        <label for="outcome" class="form-label">Outcome notes (optional)</label>
+                        <textarea id="outcome" name="outcome" class="form-control mb-2" rows="2" maxlength="500"></textarea>
+                        <button type="submit" class="btn btn-success"><i class="bi bi-check2-circle"></i> Mark Completed</button>
+                    </form>
+                    <div class="d-flex gap-2">
+                        <form asp-action="Missed" asp-route-id="@f.FollowUpId" method="post">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Mark Missed</button>
+                        </form>
+                        <form asp-action="Cancel" asp-route-id="@f.FollowUpId" method="post" data-confirm="Cancel this follow-up?">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">Cancel Follow-Up</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<partial name="_AuditHistory" model="Model.History" />

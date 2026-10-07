@@ -1,0 +1,72 @@
+@model UserFormViewModel
+@{
+    ViewData["Title"] = Model.IsNew ? "New User" : "Edit User";
+    var managers = ViewData["Managers"] as List<SelectListItem> ?? new();
+    var roles = ViewData["Roles"] as List<SelectListItem> ?? new();
+}
+<div class="row justify-content-center"><div class="col-lg-8">
+    <h1 class="h4 mb-3">@ViewData["Title"]</h1>
+    <div class="card"><div class="card-body">
+        <form asp-action="@(Model.IsNew ? "Create" : "Edit")" asp-route-id="@Model.Id" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="FullName" class="form-label required"></label>
+                    <input asp-for="FullName" class="form-control" maxlength="100" />
+                    <span asp-validation-for="FullName"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label required"></label>
+                    <input asp-for="Email" class="form-control" maxlength="150" autocomplete="off" />
+                    <span asp-validation-for="Email"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Role" class="form-label required"></label>
+                    <select asp-for="Role" class="form-select" asp-items="roles" id="roleSelect"></select>
+                    <span asp-validation-for="Role"></span>
+                </div>
+                <div class="col-md-6" id="managerField">
+                    <label asp-for="ManagerId" class="form-label"></label>
+                    <select asp-for="ManagerId" class="form-select" asp-items="managers"><option value="">-- None --</option></select>
+                    <div class="form-text">Sales Executives report to a manager; managers see their team's records.</div>
+                </div>
+                @if (Model.IsNew)
+                {
+                    <div class="col-md-6">
+                        <label asp-for="Password" class="form-label required"></label>
+                        <input asp-for="Password" class="form-control" autocomplete="new-password" />
+                        <div class="form-text">Min 8 chars, upper &amp; lower case, number and symbol.</div>
+                        <span asp-validation-for="Password"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmPassword" class="form-label required"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmPassword"></span>
+                    </div>
+                }
+                <div class="col-12">
+                    <div class="form-check form-switch">
+                        <input asp-for="IsActive" class="form-check-input" />
+                        <label asp-for="IsActive" class="form-check-label"></label>
+                    </div>
+                    <div class="form-text">Inactive users cannot sign in; existing sessions end within a minute.</div>
+                </div>
+            </div>
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div></div>
+</div></div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const role = document.getElementById('roleSelect');
+            const mgr = document.getElementById('managerField');
+            const sync = () => mgr.classList.toggle('d-none', role.value !== 'SalesExecutive');
+            role.addEventListener('change', sync); sync();
+        })();
+    </script>
+}

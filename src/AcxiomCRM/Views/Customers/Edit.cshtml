@@ -1,0 +1,16 @@
+@model CustomerInput
+@{
+    ViewData["Title"] = "Edit Customer";
+    var id = ViewContext.RouteData.Values["id"];
+}
+<div class="page-header"><h1>Edit Customer <small class="text-muted fs-6">@ViewData["Code"]</small></h1></div>
+<div class="card"><div class="card-body">
+    <form asp-action="Edit" asp-route-id="@id" method="post">
+        <partial name="_Form" model="Model" />
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save Changes</button>
+            <a asp-action="Details" asp-route-id="@id" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

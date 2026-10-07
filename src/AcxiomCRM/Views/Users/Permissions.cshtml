@@ -1,0 +1,33 @@
+@model IReadOnlyList<PermissionMatrix.Row>
+@{
+    ViewData["Title"] = "Permissions";
+    string Css(string v) => v.StartsWith("No") ? "text-danger" : v is "Full" or "Yes" or "Anyone" or "All data" ? "text-success fw-semibold" : "";
+}
+<div class="page-header">
+    <h1><i class="bi bi-ui-checks-grid"></i> Permissions</h1>
+    <a asp-action="Roles" class="btn btn-outline-primary"><i class="bi bi-person-badge"></i> View Roles</a>
+</div>
+<div class="card">
+    <div class="card-header">Permission Matrix</div>
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead><tr><th>Module</th><th>Admin</th><th>Manager</th><th>Sales Executive</th></tr></thead>
+            <tbody>
+                @foreach (var row in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@row.Module</td>
+                        <td class="@Css(row.Admin)">@row.Admin</td>
+                        <td class="@Css(row.Manager)">@row.Manager</td>
+                        <td class="@Css(row.SalesExecutive)">@row.SalesExecutive</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="alert alert-info mt-3 small mb-0">
+    <i class="bi bi-shield-check"></i> Enforced on the server, not just by hiding menu items: role checks use <code>[Authorize(Roles = …)]</code>,
+    and every query is filtered to the user's data scope. Opening another user's record by changing the URL or calling the API returns <strong>404</strong>,
+    and restricted pages return <strong>403</strong>.
+</div>

@@ -1,0 +1,73 @@
+@model LeadConvertInput
+@{
+    var lead = (Lead)ViewData["Lead"]!;
+    ViewData["Title"] = "Convert Lead";
+}
+<div class="page-header"><h1>Convert Lead: @lead.LeadName</h1></div>
+<div class="row g-3">
+    <div class="col-lg-4">
+        <div class="card"><div class="card-body">
+            <h2 class="h6 text-muted text-uppercase">New customer from lead</h2>
+            <dl class="detail-list mb-0">
+                <dt>Name</dt><dd>@lead.LeadName</dd>
+                <dt>Company</dt><dd>@(lead.CompanyName ?? "—")</dd>
+                <dt>Email</dt><dd>@(lead.Email ?? "— (required to convert)")</dd>
+                <dt>Phone</dt><dd>@(lead.Phone ?? "— (required to convert)")</dd>
+            </dl>
+            <p class="small text-muted mb-0">If a customer with this email already exists, the lead is linked to it instead.</p>
+        </div></div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card"><div class="card-body">
+            <form asp-action="Convert" asp-route-id="@lead.LeadId" method="post">
+                <div asp-validation-summary="All" class="alert alert-danger py-2" role="alert"></div>
+                <div class="form-check form-switch mb-3">
+                    <input asp-for="CreateOpportunity" class="form-check-input" id="createOpp" />
+                    <label asp-for="CreateOpportunity" class="form-check-label" for="createOpp"></label>
+                </div>
+                <div id="oppFields" class="row g-3">
+                    <div class="col-12">
+                        <label asp-for="OpportunityName" class="form-label"></label>
+                        <input asp-for="OpportunityName" class="form-control" maxlength="150" />
+                        <span asp-validation-for="OpportunityName"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Amount" class="form-label"></label>
+                        <div class="input-group"><span class="input-group-text">₹</span>
+                            <input asp-for="Amount" class="form-control" type="number" min="0.01" step="0.01" /></div>
+                        <span asp-validation-for="Amount"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Probability" class="form-label"></label>
+                        <input asp-for="Probability" class="form-control" type="number" min="0" max="100" />
+                        <span asp-validation-for="Probability"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="ExpectedCloseDate" class="form-label"></label>
+                        <input asp-for="ExpectedCloseDate" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="ExpectedCloseDate"></span>
+                    </div>
+                </div>
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-success"><i class="bi bi-arrow-right-circle"></i> Convert</button>
+                    <a asp-action="Details" asp-route-id="@lead.LeadId" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div></div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const toggle = document.getElementById('createOpp');
+            const fields = document.getElementById('oppFields');
+            const sync = () => {
+                fields.classList.toggle('d-none', !toggle.checked);
+                fields.querySelectorAll('input').forEach(i => i.disabled = !toggle.checked);
+            };
+            toggle.addEventListener('change', sync);
+            sync();
+        })();
+    </script>
+}

@@ -1,0 +1,55 @@
+@model OpportunityInput
+@{
+    var customers = ViewData["Customers"] as List<SelectListItem> ?? new();
+    var leads = ViewData["Leads"] as List<SelectListItem> ?? new();
+}
+<div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="OpportunityName" class="form-label required"></label>
+        <input asp-for="OpportunityName" class="form-control" maxlength="150" />
+        <span asp-validation-for="OpportunityName"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="CustomerId" class="form-label required"></label>
+        <select asp-for="CustomerId" class="form-select" asp-items="customers">
+            <option value="">-- Select customer --</option>
+        </select>
+        <span asp-validation-for="CustomerId"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Amount" class="form-label required"></label>
+        <div class="input-group"><span class="input-group-text">₹</span>
+            <input asp-for="Amount" class="form-control" type="number" min="0.01" step="0.01" /></div>
+        <span asp-validation-for="Amount"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Stage" class="form-label required"></label>
+        <select asp-for="Stage" class="form-select" asp-items="EnumExtensions.ToSelectList(Model.Stage)"></select>
+        <span asp-validation-for="Stage"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Probability" class="form-label required"></label>
+        <input asp-for="Probability" class="form-control" type="number" min="0" max="100" />
+        <span asp-validation-for="Probability"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="ExpectedCloseDate" class="form-label required"></label>
+        <input asp-for="ExpectedCloseDate" class="form-control" />
+        <div class="form-text">Cannot be in the past while the opportunity is open.</div>
+        <span asp-validation-for="ExpectedCloseDate"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="LeadId" class="form-label"></label>
+        <select asp-for="LeadId" class="form-select" asp-items="leads">
+            <option value="">-- None --</option>
+        </select>
+        <span asp-validation-for="LeadId"></span>
+    </div>
+    <partial name="_AssignedTo" model="Model.AssignedTo" />
+    <div class="col-12">
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes" class="form-control" rows="3" maxlength="1000"></textarea>
+        <span asp-validation-for="Notes"></span>
+    </div>
+</div>

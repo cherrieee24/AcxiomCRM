@@ -1,0 +1,103 @@
+@model ListViewModel<FollowUp, FollowUpFilter>
+@{
+    ViewData["Title"] = "Follow-Ups";
+    var f = Model.Filter;
+    var views = new[] { ("", "All"), ("upcoming", "Upcoming"), ("overdue", "Overdue") };
+}
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-calendar-check"></i> @Ui.ScopeTitle(User, "Follow-Ups")</h1>
+        <partial name="_ScopeHint" />
+    </div>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-calendar-plus"></i> Schedule Follow-Up</a>
+</div>
+
+<ul class="nav nav-pills mb-3">
+    @foreach (var (key, label) in views)
+    {
+        <li class="nav-item">
+            <a class="nav-link @((f.View ?? "") == key ? "active" : "")" href="@Ui.WithQuery(Context.Request, ("view", key == "" ? null : key), ("page", null))">@label</a>
+        </li>
+    }
+    <li class="nav-item"><a class="nav-link" asp-action="Pending"><i class="bi bi-hourglass-split"></i> Pending</a></li>
+</ul>
+
+<form method="get" class="filter-bar row g-2 align-items-end">
+    <input type="hidden" name="View" value="@f.View" />
+    <div class="col-md-3">
+        <label class="form-label small" for="Search">Search</label>
+        <input id="Search" name="Search" value="@f.Search" class="form-control" placeholder="Subject, customer or lead" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="Status">Status</label>
+        <select id="Status" name="Status" class="form-select" asp-items="EnumExtensions.ToSelectList(f.Status)"><option value="">All</option></select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="From">From</label>
+        <input id="From" name="From" type="date" value="@f.From?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="To">To</label>
+        <input id="To" name="To" type="date" value="@f.To?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    @if (Model.Users.Count > 0)
+    {
+        <div class="col-md-3">
+            <label class="form-label small" for="AssignedTo">Assigned To</label>
+            <select id="AssignedTo" name="AssignedTo" class="form-select" asp-items="Model.Users"><option value="">Anyone</option></select>
+        </div>
+    }
+    <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filter</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th><partial name="_SortHeader" model='("date", "Date", f.Sort, f.Desc)' /></th>
+                    <th><partial name="_SortHeader" model='("subject", "Subject", f.Sort, f.Desc)' /></th>
+                    <th>Type</th>
+                    <th>Related To</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var x in Model.Items.Items)
+                {
+                    <tr class="@(x.IsOverdue ? "table-danger" : "")">
+                        <td class="text-nowrap">@Ui.Date(x.FollowUpDate)</td>
+                        <td><a asp-action="Details" asp-route-id="@x.FollowUpId" class="fw-semibold">@x.Subject</a></td>
+                        <td>@x.FollowUpType</td>
+                        <td class="small">
+                            @if (x.Customer != null) { <div><i class="bi bi-building"></i> @x.Customer.CustomerName</div> }
+                            @if (x.Lead != null) { <div><i class="bi bi-person"></i> @x.Lead.LeadName</div> }
+                            @if (x.Opportunity != null) { <div><i class="bi bi-briefcase"></i> @x.Opportunity.OpportunityName</div> }
+                        </td>
+                        <td><span class="@Ui.Badge(x.Status)">@(x.IsOverdue ? "Overdue" : x.Status.ToString())</span></td>
+                        <td>@(x.AssignedUser?.FullName ?? "—")</td>
+                        <td class="text-end text-nowrap">
+                            @if (x.Status == FollowUpStatus.Planned)
+                            {
+                                <form asp-action="Complete" asp-route-id="@x.FollowUpId" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Mark completed"><i class="bi bi-check2"></i></button>
+                                </form>
+                                <a asp-action="Reschedule" asp-route-id="@x.FollowUpId" class="btn btn-sm btn-outline-secondary" title="Reschedule"><i class="bi bi-calendar-event"></i></a>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (Model.Items.TotalCount == 0)
+                {
+                    <tr><td colspan="7" class="text-center text-muted py-4">No follow-ups found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<partial name="_Pager" model="Model.Items.Pager" />

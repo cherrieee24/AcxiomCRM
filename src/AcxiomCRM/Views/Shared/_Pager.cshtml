@@ -1,0 +1,29 @@
+@model PagerInfo
+@{
+    var first = Model.TotalCount == 0 ? 0 : (Model.Page - 1) * Model.PageSize + 1;
+    var last = Math.Min(Model.Page * Model.PageSize, Model.TotalCount);
+    var start = Math.Max(1, Model.Page - 2);
+    var end = Math.Min(Model.TotalPages, Model.Page + 2);
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
+    <small class="text-muted">Showing @first&ndash;@last of @Model.TotalCount</small>
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Pagination">
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+                    <a class="page-link" href="@Ui.WithQuery(Context.Request, ("page", (Model.Page - 1).ToString()))" aria-label="Previous">&laquo;</a>
+                </li>
+                @for (var p = start; p <= end; p++)
+                {
+                    <li class="page-item @(p == Model.Page ? "active" : "")">
+                        <a class="page-link" href="@Ui.WithQuery(Context.Request, ("page", p.ToString()))">@p</a>
+                    </li>
+                }
+                <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" href="@Ui.WithQuery(Context.Request, ("page", (Model.Page + 1).ToString()))" aria-label="Next">&raquo;</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>

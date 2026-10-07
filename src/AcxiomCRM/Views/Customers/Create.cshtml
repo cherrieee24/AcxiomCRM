@@ -1,0 +1,15 @@
+@model CustomerInput
+@{
+    ViewData["Title"] = "New Customer";
+}
+<div class="page-header"><h1>New Customer</h1></div>
+<div class="card"><div class="card-body">
+    <form asp-action="Create" method="post">
+        <partial name="_Form" model="Model" />
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save Customer</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

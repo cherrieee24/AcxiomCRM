@@ -1,0 +1,2 @@
+@model (string Key, string Label, string? Sort, bool Desc)
+<a href="@Ui.SortUrl(Context.Request, Model.Key, Model.Sort, Model.Desc)">@Model.Label <i class="bi @Ui.SortIcon(Model.Key, Model.Sort, Model.Desc)"></i></a>

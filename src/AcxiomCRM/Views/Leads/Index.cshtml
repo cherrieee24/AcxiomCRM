@@ -1,0 +1,88 @@
+@model ListViewModel<Lead, LeadFilter>
+@{
+    ViewData["Title"] = "Leads";
+    var f = Model.Filter;
+}
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-person-lines-fill"></i> @Ui.ScopeTitle(User, "Leads")</h1>
+        <partial name="_ScopeHint" />
+    </div>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Lead</a>
+</div>
+
+<form method="get" class="filter-bar row g-2 align-items-end">
+    <div class="col-md-3">
+        <label class="form-label small" for="Search">Search</label>
+        <input id="Search" name="Search" value="@f.Search" class="form-control" placeholder="Lead name, company, email" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="Status">Status</label>
+        <select id="Status" name="Status" class="form-select" asp-items="EnumExtensions.ToSelectList(f.Status)"><option value="">All</option></select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="Source">Source</label>
+        <select id="Source" name="Source" class="form-select" asp-items="EnumExtensions.ToSelectList(f.Source)"><option value="">All</option></select>
+    </div>
+    @if (Model.Users.Count > 0)
+    {
+        <div class="col-md-2">
+            <label class="form-label small" for="AssignedTo">Assigned To</label>
+            <select id="AssignedTo" name="AssignedTo" class="form-select" asp-items="Model.Users"><option value="">Anyone</option></select>
+        </div>
+    }
+    <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filter</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th><partial name="_SortHeader" model='("name", "Lead", f.Sort, f.Desc)' /></th>
+                    <th>Company</th>
+                    <th>Source</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th class="text-end"><partial name="_SortHeader" model='("value", "Expected Value", f.Sort, f.Desc)' /></th>
+                    <th>Owner</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var l in Model.Items.Items)
+                {
+                    <tr>
+                        <td class="text-muted small">@l.LeadCode</td>
+                        <td><a asp-action="Details" asp-route-id="@l.LeadId" class="fw-semibold">@l.LeadName</a></td>
+                        <td>@l.CompanyName</td>
+                        <td>@l.Source.DisplayName()</td>
+                        <td><span class="@Ui.Badge(l.Status)">@l.Status</span></td>
+                        <td><span class="@Ui.Badge(l.Priority)">@l.Priority</span></td>
+                        <td class="text-end">@Ui.Money(l.ExpectedValue)</td>
+                        <td>@(l.AssignedUser?.FullName ?? "—")</td>
+                        <td class="text-end text-nowrap">
+                            @if (l.Status == LeadStatus.Qualified)
+                            {
+                                <a asp-action="Convert" asp-route-id="@l.LeadId" class="btn btn-sm btn-success" title="Convert"><i class="bi bi-arrow-right-circle"></i></a>
+                            }
+                            @if (l.Status != LeadStatus.Converted)
+                            {
+                                <a asp-action="Edit" asp-route-id="@l.LeadId" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (Model.Items.TotalCount == 0)
+                {
+                    <tr><td colspan="9" class="text-center text-muted py-4">No leads found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<partial name="_Pager" model="Model.Items.Pager" />

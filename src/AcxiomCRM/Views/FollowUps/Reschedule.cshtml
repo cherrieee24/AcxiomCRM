@@ -1,0 +1,27 @@
+@model FollowUpRescheduleInput
+@{
+    var f = (FollowUp)ViewData["FollowUp"]!;
+    ViewData["Title"] = "Reschedule Follow-Up";
+}
+<div class="row justify-content-center"><div class="col-md-7">
+    <h1 class="h4 mb-3">Reschedule: @f.Subject</h1>
+    <div class="card"><div class="card-body">
+        <p class="text-muted">Currently @f.Status on @Ui.Date(f.FollowUpDate).</p>
+        <form asp-action="Reschedule" asp-route-id="@f.FollowUpId" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+            <div class="mb-3">
+                <label asp-for="FollowUpDate" class="form-label required"></label>
+                <input asp-for="FollowUpDate" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="FollowUpDate"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Remarks" class="form-label">Reason (optional)</label>
+                <textarea asp-for="Remarks" class="form-control" rows="2" maxlength="1000"></textarea>
+                <span asp-validation-for="Remarks"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Reschedule</button>
+            <a asp-action="Details" asp-route-id="@f.FollowUpId" class="btn btn-link">Cancel</a>
+        </form>
+    </div></div>
+</div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

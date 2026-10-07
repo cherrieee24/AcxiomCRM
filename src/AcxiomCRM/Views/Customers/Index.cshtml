@@ -1,0 +1,77 @@
+@model ListViewModel<Customer, CustomerFilter>
+@{
+    ViewData["Title"] = "Customers";
+    var f = Model.Filter;
+}
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-building"></i> @Ui.ScopeTitle(User, "Customers")</h1>
+        <partial name="_ScopeHint" />
+    </div>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Customer</a>
+</div>
+
+<form method="get" class="filter-bar row g-2 align-items-end">
+    <div class="col-md-4">
+        <label class="form-label small" for="Search">Search</label>
+        <input id="Search" name="Search" value="@f.Search" class="form-control" placeholder="Name, email, phone, company or code" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="Status">Status</label>
+        <select id="Status" name="Status" class="form-select" asp-items="EnumExtensions.ToSelectList(f.Status)">
+            <option value="">All</option>
+        </select>
+    </div>
+    @if (Model.Users.Count > 0)
+    {
+        <div class="col-md-3">
+            <label class="form-label small" for="AssignedTo">Assigned To</label>
+            <select id="AssignedTo" name="AssignedTo" class="form-select" asp-items="Model.Users"><option value="">Anyone</option></select>
+        </div>
+    }
+    <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filter</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th><partial name="_SortHeader" model='("name", "Customer", f.Sort, f.Desc)' /></th>
+                    <th><partial name="_SortHeader" model='("company", "Company", f.Sort, f.Desc)' /></th>
+                    <th>Contact</th>
+                    <th>Status</th>
+                    <th>Owner</th>
+                    <th><partial name="_SortHeader" model='("created", "Created", f.Sort, f.Desc)' /></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model.Items.Items)
+                {
+                    <tr>
+                        <td class="text-muted small">@c.CustomerCode</td>
+                        <td><a asp-action="Details" asp-route-id="@c.CustomerId" class="fw-semibold">@c.CustomerName</a></td>
+                        <td>@c.CompanyName</td>
+                        <td class="small">@c.Email<br /><span class="text-muted">@c.Phone</span></td>
+                        <td><span class="@Ui.Badge(c.Status)">@c.Status.DisplayName()</span></td>
+                        <td>@(c.AssignedUser?.FullName ?? "—")</td>
+                        <td class="small text-muted">@Ui.Timestamp(c.CreatedDate)</td>
+                        <td class="text-end text-nowrap">
+                            <a asp-action="Edit" asp-route-id="@c.CustomerId" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Items.TotalCount == 0)
+                {
+                    <tr><td colspan="8" class="text-center text-muted py-4">No customers found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<partial name="_Pager" model="Model.Items.Pager" />

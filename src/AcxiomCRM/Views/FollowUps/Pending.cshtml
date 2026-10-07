@@ -1,0 +1,76 @@
+@model PagedList<FollowUp>
+@{
+    ViewData["Title"] = "Pending Follow-Ups";
+    var today = DateTime.Today;
+    var weekEnd = today.AddDays(7);
+    var groups = new[]
+    {
+        ("Overdue", "text-danger", "bi-exclamation-circle", Model.Items.Where(f => f.FollowUpDate.Date < today).ToList()),
+        ("Today", "text-primary", "bi-calendar-day", Model.Items.Where(f => f.FollowUpDate.Date == today).ToList()),
+        ("Next 7 days", "", "bi-calendar-week", Model.Items.Where(f => f.FollowUpDate.Date > today && f.FollowUpDate.Date <= weekEnd).ToList()),
+        ("Later", "text-muted", "bi-calendar", Model.Items.Where(f => f.FollowUpDate.Date > weekEnd).ToList())
+    };
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-hourglass-split"></i> Pending Follow-Ups</h1>
+        <small class="text-muted">@Model.TotalCount planned follow-up@(Model.TotalCount == 1 ? "" : "s") awaiting action &middot; @Ui.ScopeHint(User)</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-list"></i> All Follow-Ups</a>
+        <a asp-action="Create" class="btn btn-primary"><i class="bi bi-calendar-plus"></i> Schedule Follow-Up</a>
+    </div>
+</div>
+
+@if (ViewData["Users"] is List<SelectListItem> users)
+{
+    <form method="get" class="filter-bar row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small" for="assignedTo">Assigned To</label>
+            <select id="assignedTo" name="assignedTo" class="form-select" asp-items="users" onchange="this.form.submit()">
+                <option value="">Everyone in my scope</option>
+            </select>
+        </div>
+    </form>
+}
+
+<div class="row g-3">
+    @foreach (var (title, css, icon, items) in groups)
+    {
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between @css">
+                    <span><i class="bi @icon"></i> @title</span>
+                    <span class="badge bg-light text-dark border">@items.Count</span>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var f in items)
+                    {
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <div>
+                                    <a asp-action="Details" asp-route-id="@f.FollowUpId" class="fw-semibold">@f.Subject</a>
+                                    <div class="small text-muted">
+                                        @string.Join(" · ", new[] { Ui.Date(f.FollowUpDate), f.FollowUpType.ToString(), f.Customer?.CustomerName, f.Lead?.LeadName, f.AssignedUser?.FullName }.Where(x => !string.IsNullOrEmpty(x)))
+                                    </div>
+                                </div>
+                                <div class="text-nowrap">
+                                    <form asp-action="Complete" asp-route-id="@f.FollowUpId" asp-route-returnUrl="@returnUrl" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success" title="Complete follow-up"><i class="bi bi-check2"></i> Complete</button>
+                                    </form>
+                                    <a asp-action="Reschedule" asp-route-id="@f.FollowUpId" class="btn btn-sm btn-outline-secondary" title="Reschedule"><i class="bi bi-calendar-event"></i></a>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                    @if (items.Count == 0) { <li class="list-group-item text-muted small">Nothing here.</li> }
+                </ul>
+            </div>
+        </div>
+    }
+</div>
+@if (Model.TotalCount > Model.Items.Count)
+{
+    <p class="small text-muted mt-3">Showing the first @Model.Items.Count by date. Use <a asp-action="Index" asp-route-status="Planned">All Follow-Ups</a> to page through the rest.</p>
+}

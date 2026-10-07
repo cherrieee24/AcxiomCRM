@@ -1,0 +1,82 @@
+@model UserListViewModel
+@{
+    ViewData["Title"] = "Users";
+}
+<div class="page-header">
+    <h1><i class="bi bi-people"></i> Users</h1>
+    <div class="d-flex gap-2">
+        <a asp-action="Roles" class="btn btn-outline-primary"><i class="bi bi-person-badge"></i> Roles</a>
+        <a asp-action="Permissions" class="btn btn-outline-primary"><i class="bi bi-ui-checks-grid"></i> Permissions</a>
+        <a asp-action="Create" class="btn btn-primary"><i class="bi bi-person-plus"></i> New User</a>
+    </div>
+</div>
+
+<form method="get" class="filter-bar row g-2 align-items-end">
+    <div class="col-md-4">
+        <label class="form-label small" for="search">Search</label>
+        <input id="search" name="search" value="@Model.Search" class="form-control" placeholder="Name or email" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label small" for="role">Role</label>
+        <select id="role" name="role" class="form-select">
+            <option value="">All roles</option>
+            @foreach (var r in Roles.All) { <option value="@r" selected="@(Model.Role == r)">@Roles.DisplayName(r)</option> }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="active">Status</label>
+        <select id="active" name="active" class="form-select">
+            <option value="">All</option>
+            <option value="true" selected="@(Model.Active == true)">Active</option>
+            <option value="false" selected="@(Model.Active == false)">Inactive</option>
+        </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filter</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr><th>Name</th><th>Email</th><th>Role</th><th>Reports To</th><th>Status</th><th>Security</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model.Users)
+                {
+                    <tr>
+                        <td class="fw-semibold">@u.FullName</td>
+                        <td>@u.Email</td>
+                        <td><span class="badge bg-primary bg-opacity-75">@Roles.DisplayName(u.Role)</span></td>
+                        <td>@(u.ManagerName ?? "—")</td>
+                        <td>@if (u.IsActive) { <span class="badge bg-success">Active</span> } else { <span class="badge bg-secondary">Inactive</span> }</td>
+                        <td class="small">
+                            @if (u.IsLockedOut)
+                            {
+                                <span class="badge bg-danger">Locked until @Ui.Timestamp(u.LockoutEnd!.Value.UtcDateTime)</span>
+                            }
+                            else if (u.FailedLoginCount > 0)
+                            {
+                                <span class="text-warning">@u.FailedLoginCount failed attempt(s)</span>
+                            }
+                            else { <span class="text-muted">OK</span> }
+                        </td>
+                        <td class="text-end text-nowrap">
+                            @if (u.IsLockedOut)
+                            {
+                                <form asp-action="Unlock" asp-route-id="@u.Id" method="post" class="d-inline" data-confirm="Unlock this account?">
+                                    <button class="btn btn-sm btn-outline-warning" title="Unlock"><i class="bi bi-unlock"></i></button>
+                                </form>
+                            }
+                            <a asp-action="ResetPassword" asp-route-id="@u.Id" class="btn btn-sm btn-outline-secondary" title="Reset password"><i class="bi bi-key"></i></a>
+                            <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Users.Count == 0) { <tr><td colspan="7" class="text-center text-muted py-4">No users found.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</div>

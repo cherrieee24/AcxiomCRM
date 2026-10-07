@@ -1,0 +1,46 @@
+@model FollowUpInput
+@{
+    var customers = ViewData["Customers"] as List<SelectListItem> ?? new();
+    var leads = ViewData["Leads"] as List<SelectListItem> ?? new();
+    var opportunities = ViewData["Opportunities"] as List<SelectListItem> ?? new();
+}
+<div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+<div class="row g-3">
+    <div class="col-md-8">
+        <label asp-for="Subject" class="form-label required"></label>
+        <input asp-for="Subject" class="form-control" maxlength="150" />
+        <span asp-validation-for="Subject"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="FollowUpType" class="form-label required"></label>
+        <select asp-for="FollowUpType" class="form-select" asp-items="EnumExtensions.ToSelectList(Model.FollowUpType)"></select>
+        <span asp-validation-for="FollowUpType"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="FollowUpDate" class="form-label required"></label>
+        <input asp-for="FollowUpDate" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+        <span asp-validation-for="FollowUpDate"></span>
+    </div>
+    <partial name="_AssignedTo" model="Model.AssignedTo" />
+    <div class="col-12"><hr class="my-1" /><small class="text-muted">Link to at least one record</small></div>
+    <div class="col-md-4">
+        <label asp-for="CustomerId" class="form-label"></label>
+        <select asp-for="CustomerId" class="form-select" asp-items="customers"><option value="">-- None --</option></select>
+        <span asp-validation-for="CustomerId"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="LeadId" class="form-label"></label>
+        <select asp-for="LeadId" class="form-select" asp-items="leads"><option value="">-- None --</option></select>
+        <span asp-validation-for="LeadId"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="OpportunityId" class="form-label"></label>
+        <select asp-for="OpportunityId" class="form-select" asp-items="opportunities"><option value="">-- None --</option></select>
+        <span asp-validation-for="OpportunityId"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="Remarks" class="form-label"></label>
+        <textarea asp-for="Remarks" class="form-control" rows="3" maxlength="1000"></textarea>
+        <span asp-validation-for="Remarks"></span>
+    </div>
+</div>

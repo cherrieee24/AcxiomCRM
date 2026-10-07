@@ -1,0 +1,41 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+<div class="auth-wrapper">
+    <div class="text-center mb-4">
+        <div class="auth-brand"><i class="bi bi-diagram-3-fill"></i> AcxiomCRM</div>
+        <p class="text-muted">Create your account. New accounts start as Sales Executive.</p>
+    </div>
+    <div class="card">
+        <div class="card-body p-4">
+            <form asp-action="Register" method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label required"></label>
+                    <input asp-for="FullName" class="form-control" autocomplete="name" />
+                    <span asp-validation-for="FullName"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label required"></label>
+                    <input asp-for="Email" class="form-control" autocomplete="username" />
+                    <span asp-validation-for="Email"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label required"></label>
+                    <input asp-for="Password" class="form-control" autocomplete="new-password" />
+                    <div class="form-text">At least 8 characters with upper &amp; lower case letters, a number and a symbol.</div>
+                    <span asp-validation-for="Password"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ConfirmPassword" class="form-label required"></label>
+                    <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmPassword"></span>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Create account</button>
+            </form>
+        </div>
+    </div>
+    <p class="text-center mt-3 text-muted">Already registered? <a asp-action="Login">Sign in</a></p>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

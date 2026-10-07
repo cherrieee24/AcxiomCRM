@@ -1,0 +1,112 @@
+@model ListViewModel<Activity, ActivityFilter>
+@{
+    ViewData["Title"] = Model.Filter.Type switch
+    {
+        ActivityType.Call => "Calls",
+        ActivityType.Meeting => "Meetings",
+        ActivityType.Email => "Emails",
+        ActivityType.Task => "Tasks",
+        _ => "Activities"
+    };
+    var f = Model.Filter;
+}
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-journal-text"></i> @Ui.ScopeTitle(User, (string)ViewData["Title"]!)</h1>
+        <partial name="_ScopeHint" />
+    </div>
+    <div class="btn-group">
+        <a asp-action="Create" asp-route-type="Call" class="btn btn-primary"><i class="bi bi-telephone"></i> Call</a>
+        <a asp-action="Create" asp-route-type="Meeting" class="btn btn-primary"><i class="bi bi-people"></i> Meeting</a>
+        <a asp-action="Create" asp-route-type="Email" class="btn btn-primary"><i class="bi bi-envelope"></i> Email</a>
+        <a asp-action="Create" asp-route-type="Task" class="btn btn-primary"><i class="bi bi-check2-square"></i> Task</a>
+    </div>
+</div>
+
+@{
+    var typeTabs = new (ActivityType? Type, string Label, string Icon)[]
+    {
+        (null, "All", "bi-list-ul"),
+        (ActivityType.Call, "Calls", "bi-telephone"),
+        (ActivityType.Meeting, "Meetings", "bi-people"),
+        (ActivityType.Email, "Emails", "bi-envelope"),
+        (ActivityType.Task, "Tasks", "bi-check2-square")
+    };
+}
+<ul class="nav nav-pills mb-3">
+    @foreach (var (type, label, icon) in typeTabs)
+    {
+        <li class="nav-item">
+            <a class="nav-link @(f.Type == type ? "active" : "")" href="@Ui.WithQuery(Context.Request, ("Type", type?.ToString()), ("page", null))"><i class="bi @icon"></i> @label</a>
+        </li>
+    }
+</ul>
+
+<form method="get" class="filter-bar row g-2 align-items-end">
+    <div class="col-md-3">
+        <label class="form-label small" for="Search">Search</label>
+        <input id="Search" name="Search" value="@f.Search" class="form-control" placeholder="Subject, customer or lead" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="Type">Type</label>
+        <select id="Type" name="Type" class="form-select" asp-items="EnumExtensions.ToSelectList(f.Type)"><option value="">All</option></select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="Status">Status</label>
+        <select id="Status" name="Status" class="form-select" asp-items="EnumExtensions.ToSelectList(f.Status)"><option value="">All</option></select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="From">From</label>
+        <input id="From" name="From" type="date" value="@f.From?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="To">To</label>
+        <input id="To" name="To" type="date" value="@f.To?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    @if (Model.Users.Count > 0)
+    {
+        <div class="col-md-3">
+            <label class="form-label small" for="AssignedTo">Assigned To</label>
+            <select id="AssignedTo" name="AssignedTo" class="form-select" asp-items="Model.Users"><option value="">Anyone</option></select>
+        </div>
+    }
+    <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filter</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th><partial name="_SortHeader" model='("date", "Date", f.Sort, f.Desc)' /></th>
+                    <th>Type</th>
+                    <th><partial name="_SortHeader" model='("subject", "Subject", f.Sort, f.Desc)' /></th>
+                    <th>Related To</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model.Items.Items)
+                {
+                    <tr>
+                        <td class="text-nowrap">@Ui.Date(a.ActivityDate)</td>
+                        <td>@a.ActivityType</td>
+                        <td><a asp-action="Details" asp-route-id="@a.ActivityId" class="fw-semibold">@a.Subject</a></td>
+                        <td class="small">@(a.Customer?.CustomerName ?? a.Lead?.LeadName ?? "—")</td>
+                        <td><span class="@Ui.Badge(a.Status)">@a.Status</span></td>
+                        <td>@(a.AssignedUser?.FullName ?? "—")</td>
+                    </tr>
+                }
+                @if (Model.Items.TotalCount == 0)
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-4">No activities found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<partial name="_Pager" model="Model.Items.Pager" />

@@ -1,0 +1,115 @@
+@model ListViewModel<AuditLog, AuditLogFilter>
+@{
+    ViewData["Title"] = "Audit Log";
+    var f = Model.Filter;
+    var entities = ViewData["Entities"] as List<string> ?? new();
+    var actions = ViewData["Actions"] as string[] ?? Array.Empty<string>();
+    var changes = ViewData["Changes"] as Dictionary<long, List<FieldChange>> ?? new();
+}
+<div class="page-header">
+    <h1><i class="bi bi-journal-lock"></i> Audit Log</h1>
+    <span class="text-muted small"><i class="bi bi-lock"></i> Append-only &middot; records cannot be edited or deleted</span>
+</div>
+
+@{
+    var tabs = new (string Label, string? Entity, string? Action, string Icon)[]
+    {
+        ("All", null, null, "bi-list-ul"),
+        ("Login", "Authentication", null, "bi-box-arrow-in-right"),
+        ("Create", null, AuditActions.Create, "bi-plus-circle"),
+        ("Update", null, AuditActions.Update, "bi-pencil-square"),
+        ("Delete", null, AuditActions.Delete, "bi-trash")
+    };
+}
+<ul class="nav nav-pills mb-3">
+    @foreach (var (label, entity, action, icon) in tabs)
+    {
+        var active = f.EntityName == entity && f.Action == action;
+        <li class="nav-item">
+            <a class="nav-link @(active ? "active" : "")" href="@Ui.WithQuery(Context.Request, ("EntityName", entity), ("Action", action), ("page", null))"><i class="bi @icon"></i> @label</a>
+        </li>
+    }
+</ul>
+
+<form method="get" class="filter-bar row g-2 align-items-end">
+    <div class="col-md-3">
+        <label class="form-label small" for="UserName">User</label>
+        <input id="UserName" name="UserName" value="@f.UserName" class="form-control" placeholder="Email contains" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="EntityName">Module</label>
+        <select id="EntityName" name="EntityName" class="form-select">
+            <option value="">All</option>
+            @foreach (var e in entities) { <option value="@e" selected="@(f.EntityName == e)">@e</option> }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="Action">Action</label>
+        <select id="Action" name="Action" class="form-select">
+            <option value="">All</option>
+            @foreach (var a in actions) { <option value="@a" selected="@(f.Action == a)">@a</option> }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="From">From</label>
+        <input id="From" name="From" type="date" value="@f.From?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small" for="To">To</label>
+        <input id="To" name="To" type="date" value="@f.To?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="col-md-1 d-flex gap-2">
+        <button type="submit" class="btn btn-primary" title="Filter"><i class="bi bi-search"></i></button>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+            <thead>
+                <tr><th>Time</th><th>User</th><th>Action</th><th>Module</th><th>Record</th><th>Result</th><th>Details</th><th>IP</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var log in Model.Items.Items)
+                {
+                    <tr>
+                        <td class="text-nowrap small">@Ui.Timestamp(log.CreatedDate)</td>
+                        <td class="small">@(log.UserName ?? "System")</td>
+                        <td><span class="badge @(log.Action is "LoginFailed" or "Lockout" ? "bg-danger" : log.Action == "Delete" ? "bg-warning text-dark" : "bg-secondary")">@log.Action</span></td>
+                        <td>@log.EntityName</td>
+                        <td class="small">@log.RecordId</td>
+                        <td>@if (log.Result == "Success") { <i class="bi bi-check-circle text-success" title="Success"></i> } else { <i class="bi bi-x-circle text-danger" title="Failure"></i> }</td>
+                        <td>
+                            @{ var fieldChanges = changes.GetValueOrDefault(log.AuditLogId) ?? new(); }
+                            @if (fieldChanges.Count > 0)
+                            {
+                                <details>
+                                    <summary class="small">@fieldChanges.Count field@(fieldChanges.Count == 1 ? "" : "s")</summary>
+                                    <table class="table table-sm table-borderless history-table mb-0 mt-1">
+                                        @foreach (var c in fieldChanges)
+                                        {
+                                            <tr>
+                                                <th scope="row">@c.Field</th>
+                                                @if (log.Action == AuditActions.Update)
+                                                {
+                                                    <td><span class="history-old">@(c.From ?? "—")</span> <i class="bi bi-arrow-right history-arrow"></i> <span class="history-new">@(c.To ?? "—")</span></td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@(c.To ?? c.From)</td>
+                                                }
+                                            </tr>
+                                        }
+                                    </table>
+                                </details>
+                            }
+                        </td>
+                        <td class="small text-muted">@log.IpAddress</td>
+                    </tr>
+                }
+                @if (Model.Items.TotalCount == 0) { <tr><td colspan="8" class="text-center text-muted py-4">No audit entries match the filter.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</div>
+<partial name="_Pager" model="Model.Items.Pager" />

@@ -1,0 +1,34 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Sign in";
+}
+<div class="auth-wrapper">
+    <div class="text-center mb-4">
+        <div class="auth-brand"><i class="bi bi-diagram-3-fill"></i> AcxiomCRM</div>
+        <p class="text-muted">Sign in to manage your customers and pipeline</p>
+    </div>
+    <div class="card">
+        <div class="card-body p-4">
+            <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label required"></label>
+                    <input asp-for="Email" class="form-control" autocomplete="username" autofocus />
+                    <span asp-validation-for="Email"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label required"></label>
+                    <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                    <span asp-validation-for="Password"></span>
+                </div>
+                <div class="form-check mb-3">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label"></label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Sign in</button>
+            </form>
+        </div>
+    </div>
+    <p class="text-center mt-3 text-muted">New here? <a asp-action="Register">Create an account</a></p>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

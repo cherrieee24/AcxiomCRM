@@ -1,0 +1,24 @@
+# Local / single-server deployment.
+#   1. cp .env.example .env   and set the admin account values
+#   2. docker compose up -d --build
+#   3. open http://localhost:8080
+services:
+  acxiomcrm:
+    build: .
+    image: acxiomcrm:latest
+    container_name: acxiomcrm
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    env_file: .env
+    environment:
+      # First administrator, created on first start only (change the password after signing in)
+      Seed__Users__0__Email: ${ADMIN_EMAIL:?Set ADMIN_EMAIL in .env}
+      Seed__Users__0__Password: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      Seed__Users__0__FullName: ${ADMIN_NAME:-Administrator}
+      Seed__Users__0__Role: Admin
+    volumes:
+      - acxiomcrm-data:/app/data
+
+volumes:
+  acxiomcrm-data:

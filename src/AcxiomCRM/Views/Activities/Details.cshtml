@@ -1,0 +1,28 @@
+@model Activity
+@{
+    ViewData["Title"] = Model.Subject;
+    var canDelete = User.IsInRole(Roles.Admin) || User.IsInRole(Roles.Manager);
+}
+<div class="page-header">
+    <div>
+        <h1>@Model.Subject <span class="@Ui.Badge(Model.Status) fs-6 align-middle">@Model.Status</span></h1>
+        <small class="text-muted">@Model.ActivityType · @Ui.Date(Model.ActivityDate)</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.ActivityId" class="btn btn-primary"><i class="bi bi-pencil"></i> Edit</a>
+        @if (canDelete)
+        {
+            <form asp-action="Delete" asp-route-id="@Model.ActivityId" method="post" data-confirm="Delete this activity?">
+                <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+        }
+    </div>
+</div>
+<div class="card"><div class="card-body">
+    <dl class="detail-list mb-0">
+        <dt>Customer</dt><dd>@if (Model.Customer != null) { <a asp-controller="Customers" asp-action="Details" asp-route-id="@Model.CustomerId">@Model.Customer.CustomerName</a> } else { <text>—</text> }</dd>
+        <dt>Lead</dt><dd>@if (Model.Lead != null) { <a asp-controller="Leads" asp-action="Details" asp-route-id="@Model.LeadId">@Model.Lead.LeadName</a> } else { <text>—</text> }</dd>
+        <dt>Assigned To</dt><dd>@(Model.AssignedUser?.FullName ?? "Unassigned")</dd>
+        <dt>Description</dt><dd class="text-pre">@(Model.Description ?? "—")</dd>
+    </dl>
+</div></div>

@@ -1,0 +1,14 @@
+@model Lead
+@{
+    ViewData["Title"] = "Delete Lead";
+}
+<div class="row justify-content-center"><div class="col-md-7">
+    <div class="card border-danger"><div class="card-body">
+        <h1 class="h4 text-danger"><i class="bi bi-exclamation-triangle"></i> Delete lead?</h1>
+        <p>You are about to delete <strong>@Model.LeadName</strong> (@Model.LeadCode). This action is recorded in the audit log.</p>
+        <form asp-action="Delete" asp-route-id="@Model.LeadId" method="post" class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">Yes, delete</button>
+            <a asp-action="Details" asp-route-id="@Model.LeadId" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div></div>
+</div></div>

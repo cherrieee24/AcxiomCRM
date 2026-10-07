@@ -1,0 +1,12 @@
+@* Assignment dropdown - hidden for Sales Executives, who always own their records (enforced server-side). *@
+@model string?
+@if (ViewData["Users"] is List<SelectListItem> users)
+{
+    <div class="col-md-6">
+        <label for="AssignedTo" class="form-label">Assigned To</label>
+        <select id="AssignedTo" name="AssignedTo" class="form-select" asp-items="users">
+            <option value="">-- Unassigned --</option>
+        </select>
+        <span class="field-validation-valid" data-valmsg-for="AssignedTo" data-valmsg-replace="true"></span>
+    </div>
+}
