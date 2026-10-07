@@ -5,7 +5,7 @@
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Open_App-4f46e5?style=for-the-badge)](https://acxiomcrm-go4x.onrender.com)
 
 🌐 **Live demo:** https://acxiomcrm-go4x.onrender.com
-*(Hosted on a free plan: the first load may take about a minute, and data resets when the service sleeps)
+Hosted on a free plan: the first load may take about a minute, and data resets when the service sleeps
 
 AcxiomCRM covers the full customer-sales lifecycle: lead capture, qualification and conversion, an opportunity pipeline, follow-ups and activity tracking. It is built with production-oriented engineering:
 
